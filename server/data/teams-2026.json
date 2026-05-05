@@ -1,0 +1,20 @@
+[
+  { "slug": "marist", "name": "Marist", "seed": null, "record": "12-4", "conference": "MAAC", "logoUrl": "/logos/marist.png", "recordAsOf": "2026-05-04" },
+  { "slug": "stony-brook", "name": "Stony Brook", "seed": null, "record": "8-6", "conference": "CAA", "logoUrl": "/logos/stony-brook.png", "recordAsOf": "2026-05-04" },
+  { "slug": "robert-morris", "name": "Robert Morris", "seed": null, "record": "9-5", "conference": "NEC", "logoUrl": "/logos/robert-morris.png", "recordAsOf": "2026-05-04" },
+  { "slug": "jacksonville", "name": "Jacksonville", "seed": null, "record": "11-4", "conference": "ASUN", "logoUrl": "/logos/jacksonville.png", "recordAsOf": "2026-05-04" },
+  { "slug": "princeton", "name": "Princeton", "seed": 1, "record": "12-2", "conference": "Ivy", "logoUrl": "/logos/princeton.png", "recordAsOf": "2026-05-04" },
+  { "slug": "penn-state", "name": "Penn State", "seed": 8, "record": "10-5", "conference": "Big Ten", "logoUrl": "/logos/penn-state.png", "recordAsOf": "2026-05-04" },
+  { "slug": "army", "name": "Army West Point", "seed": 9, "record": "11-4", "conference": "Patriot", "logoUrl": "/logos/army.png", "recordAsOf": "2026-05-04" },
+  { "slug": "notre-dame", "name": "Notre Dame", "seed": 2, "record": "11-4", "conference": "ACC", "logoUrl": "/logos/notre-dame.png", "recordAsOf": "2026-05-04" },
+  { "slug": "johns-hopkins", "name": "Johns Hopkins", "seed": 7, "record": "10-5", "conference": "Big Ten", "logoUrl": "/logos/johns-hopkins.png", "recordAsOf": "2026-05-04" },
+  { "slug": "cornell", "name": "Cornell", "seed": 10, "record": "10-4", "conference": "Ivy", "logoUrl": "/logos/cornell.png", "recordAsOf": "2026-05-04" },
+  { "slug": "virginia", "name": "Virginia", "seed": 5, "record": "11-4", "conference": "ACC", "logoUrl": "/logos/virginia.png", "recordAsOf": "2026-05-04" },
+  { "slug": "georgetown", "name": "Georgetown", "seed": 12, "record": "10-5", "conference": "Big East", "logoUrl": "/logos/georgetown.png", "recordAsOf": "2026-05-04" },
+  { "slug": "richmond", "name": "Richmond", "seed": 4, "record": "12-3", "conference": "Atlantic 10", "logoUrl": "/logos/richmond.png", "recordAsOf": "2026-05-04" },
+  { "slug": "duke", "name": "Duke", "seed": 13, "record": "10-5", "conference": "ACC", "logoUrl": "/logos/duke.png", "recordAsOf": "2026-05-04" },
+  { "slug": "north-carolina", "name": "North Carolina", "seed": 3, "record": "10-4", "conference": "ACC", "logoUrl": "/logos/north-carolina.png", "recordAsOf": "2026-05-04" },
+  { "slug": "albany", "name": "UAlbany", "seed": 14, "record": "10-5", "conference": "America East", "logoUrl": "/logos/albany.png", "recordAsOf": "2026-05-04" },
+  { "slug": "yale", "name": "Yale", "seed": 6, "record": "11-3", "conference": "Ivy", "logoUrl": "/logos/yale.png", "recordAsOf": "2026-05-04" },
+  { "slug": "syracuse", "name": "Syracuse", "seed": 11, "record": "9-6", "conference": "ACC", "logoUrl": "/logos/syracuse.png", "recordAsOf": "2026-05-04" }
+]
