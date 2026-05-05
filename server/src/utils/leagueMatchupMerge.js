@@ -80,14 +80,24 @@ async function getMatchupsMergedForLeague(leagueId) {
   return plain
 }
 
-/** Flat index of every matchup node (including nested feeders) for admin validation. */
+/**
+ * Flat index of every matchup node (including nested feeders) for admin validation.
+ * Prefer the first registered node per id (typically the standalone DB doc, earlier in
+ * roundOrder) so we do not overwrite with a nested populate copy that can lag behind
+ * on actualWinner after merge.
+ */
 function flattenMatchupsById(topLevel) {
   const byId = {}
   function walk(m) {
     if (!m || !m._id) return
-    byId[m._id.toString()] = m
-    if (m.feederForTeam1 && m.feederForTeam1._id) walk(m.feederForTeam1)
-    if (m.feederForTeam2 && m.feederForTeam2._id) walk(m.feederForTeam2)
+    const id = m._id.toString()
+    if (!byId[id]) byId[id] = m
+    if (m.feederForTeam1 && typeof m.feederForTeam1 === 'object' && m.feederForTeam1._id) {
+      walk(m.feederForTeam1)
+    }
+    if (m.feederForTeam2 && typeof m.feederForTeam2 === 'object' && m.feederForTeam2._id) {
+      walk(m.feederForTeam2)
+    }
   }
   for (const m of topLevel) walk(m)
   return byId

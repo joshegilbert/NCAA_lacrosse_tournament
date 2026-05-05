@@ -13,12 +13,35 @@ export function buildMatchupsById(matchups) {
   const m = {}
   function walk(node) {
     if (!node || !node._id) return
-    m[node._id.toString()] = node
-    if (node.feederForTeam1 && node.feederForTeam1._id) walk(node.feederForTeam1)
-    if (node.feederForTeam2 && node.feederForTeam2._id) walk(node.feederForTeam2)
+    const id = node._id.toString()
+    if (!m[id]) m[id] = node
+    if (node.feederForTeam1 && typeof node.feederForTeam1 === 'object' && node.feederForTeam1._id) {
+      walk(node.feederForTeam1)
+    }
+    if (node.feederForTeam2 && typeof node.feederForTeam2 === 'object' && node.feederForTeam2._id) {
+      walk(node.feederForTeam2)
+    }
   }
   for (const x of matchups || []) walk(x)
   return m
+}
+
+/** Find a populated team object anywhere in the bracket graph (for display fallbacks). */
+function findTeamDocInGraph(matchupsById, wid) {
+  const w = (wid || '').toString()
+  if (!w) return null
+  for (const node of Object.values(matchupsById)) {
+    for (const t of [node.team1, node.team2]) {
+      if (t && teamIdStr(t) === w) {
+        return typeof t === 'object' && t != null && (t.name != null || t.logoUrl != null) ? t : { _id: w }
+      }
+    }
+    const aw = node.actualWinner
+    if (aw && teamIdStr(aw) === w) {
+      return typeof aw === 'object' && aw != null && (aw.name != null || aw.logoUrl != null) ? aw : { _id: w }
+    }
+  }
+  return null
 }
 
 /** Teams eliminated by an entered actual result (losers of decided games in the real bracket). */
@@ -46,13 +69,15 @@ export function resolvePickToTeam(matchupId, pickMap, matchupsById) {
   const wid = pickMap[mid]
   if (!wid) return null
   const m = matchupsById[mid]
-  if (!m) return { _id: wid, name: 'Team' }
+  if (!m) return findTeamDocInGraph(matchupsById, wid) || { _id: wid, name: 'Unknown team' }
   const left = resolveCompetitor(m, 1, pickMap, matchupsById)
   const right = resolveCompetitor(m, 2, pickMap, matchupsById)
   const w = wid.toString()
   if (left && teamId(left) === w) return left
   if (right && teamId(right) === w) return right
-  return { _id: wid, name: 'Team' }
+  // Pick can disagree with current upstream picks (stale) or graph used a duplicate node;
+  // still show the real school from anywhere in the tree.
+  return findTeamDocInGraph(matchupsById, wid) || { _id: wid, name: 'Unknown team' }
 }
 
 /**

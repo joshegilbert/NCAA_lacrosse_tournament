@@ -102,3 +102,64 @@ npm run build
 ```
 
 Serve the `client/dist` folder with any static host; set `VITE_API_URL` at build time to your API’s public URL.
+
+## Deploy on Vercel (single project: Vue + Express API)
+
+This repo is wired for **one Vercel deployment**: static files from `client/dist`, and `/api/*` handled by a serverless function (`api/index.js`) that runs the same Express app as `server/`.
+
+### 1. MongoDB Atlas
+
+1. Create a free cluster and a database user.
+2. **Network Access** → allow **`0.0.0.0/0`** (Vercel functions use dynamic IPs).
+3. Copy the **SRV connection string** and substitute the password → use as `MONGO_URI`.
+
+### 2. Import the project on Vercel
+
+1. [vercel.com/new](https://vercel.com/new) → import `NCAA_lacrosse_tournament` (or your fork).
+2. Leave the **root directory** as the repository root (so `vercel.json` is picked up).
+3. Vercel will use `installCommand` / `buildCommand` / `outputDirectory` from `vercel.json`.
+
+### 3. Environment variables (Project → Settings → Environment Variables)
+
+Set for **Production** (and **Preview** if you use preview deployments):
+
+| Name | Example / notes |
+| --- | --- |
+| `MONGO_URI` | Atlas SRV string |
+| `JWT_SECRET` | Long random string (not the dev default) |
+| `CLIENT_ORIGIN` | Your real site URL(s), comma-separated, e.g. `https://your-app.vercel.app` |
+
+Optional:
+
+- `BRACKET_LOCK_AT` — ISO override for default league lock (see `server/src/config/app.config.js`).
+- `VITE_API_URL` — Only if the API is on a **different** host than the site. If unset, production builds use same-origin **`/api`** (correct for this single-project setup).
+
+`CLIENT_ORIGIN` is used for CORS; the API also allows any `*.vercel.app` origin so preview URLs work. Production custom domains should still be listed in `CLIENT_ORIGIN` if you add one.
+
+### 4. Seed the bracket on Atlas (once)
+
+From your machine (not on Vercel), point at the same database:
+
+```bash
+cd server
+export MONGO_URI='mongodb+srv://...your-atlas-uri...'
+npm run seed
+```
+
+Optional: `npm run migrate-league-results` if you migrated from older global winners.
+
+On the **Hobby** plan, serverless functions are capped at **10s** (configured in `vercel.json`). Upgrade if you need longer cold starts against Atlas.
+
+### 5. Smoke test
+
+Open `https://<deployment>.vercel.app/api/health` — expect `{"ok":true}`. Register a user in the UI, create a league, and confirm data appears in Atlas.
+
+### Local “full stack” with Vercel routing
+
+With [Vercel CLI](https://vercel.com/docs/cli) installed and logged in:
+
+```bash
+vercel dev
+```
+
+This approximates production routing (static + `/api` function). You still need `MONGO_URI` and friends in `.env` or pulled from Vercel.

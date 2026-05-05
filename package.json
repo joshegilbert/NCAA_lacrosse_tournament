@@ -1,0 +1,5 @@
+{
+  "name": "lacrosse-tournament",
+  "private": true,
+  "description": "Monorepo root for Vercel (client static + api serverless). Run dev from client/ and server/."
+}
