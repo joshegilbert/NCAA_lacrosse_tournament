@@ -10,6 +10,7 @@ const memberId = route.params.userId
 const locked = ref(false)
 const hasEntry = ref(true)
 const breakdown = ref([])
+const error = ref('')
 
 function pickLabel(b) {
   return [b.displayRound, b.key].filter(Boolean).join(' · ')
@@ -37,10 +38,15 @@ function statusChipClass(st) {
 }
 
 async function load() {
-  const eRes = await api(`/bracket/league/${leagueId}/entries/${memberId}`)
-  locked.value = eRes.locked
-  hasEntry.value = eRes.hasEntry !== false
-  breakdown.value = eRes.breakdown || []
+  error.value = ''
+  try {
+    const eRes = await api(`/bracket/league/${leagueId}/entries/${memberId}`)
+    locked.value = eRes.locked
+    hasEntry.value = eRes.hasEntry !== false
+    breakdown.value = eRes.breakdown || []
+  } catch (e) {
+    error.value = e.message || 'Could not load bracket'
+  }
 }
 
 function rowClass(st) {
@@ -66,7 +72,10 @@ onMounted(load)
     </header>
 
     <div class="mx-auto max-w-4xl space-y-3 px-4 py-6">
-      <p v-if="!hasEntry" class="text-slate-600">No bracket submitted yet.</p>
+      <p v-if="error" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+        {{ error }}
+      </p>
+      <p v-else-if="!hasEntry" class="text-slate-600">No bracket submitted yet.</p>
       <template v-else>
         <div
           v-for="b in breakdown"

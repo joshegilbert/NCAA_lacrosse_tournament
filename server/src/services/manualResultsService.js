@@ -7,9 +7,24 @@ async function setMatchupWinner(leagueId, matchupId, teamId) {
   const byId = flattenMatchupsById(mergedTop)
   const m = byId[matchupId.toString()]
   if (!m) return { error: 'Matchup not found' }
+
+  // Allow explicit clear.
+  if (!teamId) {
+    await LeagueMatchupResult.deleteOne({ league: leagueId, matchup: matchupId })
+    return { ok: true, cleared: true }
+  }
+
   if (!isValidAdminWinnerChoice(m, teamId, byId)) {
     return { error: 'That team is not in this matchup yet. Set earlier round winners first.' }
   }
+
+  // Toggle off if clicking the already-selected winner again.
+  const current = (m.actualWinner && (m.actualWinner._id || m.actualWinner)) || null
+  if (current && current.toString() === teamId.toString()) {
+    await LeagueMatchupResult.deleteOne({ league: leagueId, matchup: matchupId })
+    return { ok: true, cleared: true }
+  }
+
   await LeagueMatchupResult.findOneAndUpdate(
     { league: leagueId, matchup: matchupId },
     { $set: { league: leagueId, matchup: matchupId, actualWinner: teamId } },

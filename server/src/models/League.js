@@ -12,6 +12,7 @@ const leagueSchema = new mongoose.Schema(
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     lockTime: { type: Date, required: true },
     isLocked: { type: Boolean, default: false },
+    manualUnlockUntil: { type: Date, default: null },
   },
   { timestamps: { createdAt: 'createdAt', updatedAt: false } }
 )
