@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'League name required' })
     }
-    const lt = lockTime ? new Date(lockTime) : getDefaultLockTime()
+    const lt = lockTime ? new Date(lockTime) : await getDefaultLockTime()
     const league = await League.create({
       name: name.trim(),
       inviteCode: generateInviteCode(),
@@ -43,6 +43,7 @@ router.post('/', async (req, res) => {
       members: [req.userId],
       lockTime: lt,
       isLocked: false,
+      manualUnlockUntil: null,
     })
     const populated = await League.findById(league._id)
       .populate('creator', 'name email')
@@ -178,6 +179,12 @@ router.patch('/:leagueId/lock', async (req, res) => {
       return res.status(400).json({ error: 'isLocked boolean required' })
     }
     league.isLocked = isLocked
+    if (isLocked) {
+      league.manualUnlockUntil = null
+    } else {
+      // Creator override: allow opening even after lockTime for testing/corrections.
+      league.manualUnlockUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    }
     await league.save()
     const populated = await League.findById(league._id)
       .populate('creator', 'name email')

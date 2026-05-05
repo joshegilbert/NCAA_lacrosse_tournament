@@ -184,13 +184,17 @@ router.get('/league/:leagueId/entries/:userId', async (req, res) => {
       return res.status(404).json({ error: 'User is not in this league' })
     }
 
+    const locked = isLeagueLocked(league)
+    if (!locked && targetId.toString() !== req.userId.toString()) {
+      return res.status(403).json({ error: 'Member brackets are hidden until the league locks.' })
+    }
+
     const matchups = await getMatchupsMergedForLeague(league._id)
     const entry = await BracketEntry.findOne({
       league: league._id,
       user: targetId,
     }).populate([{ path: 'picks.matchup' }, { path: 'picks.selectedWinner' }])
 
-    const locked = isLeagueLocked(league)
     if (!entry) {
       const breakdown = breakdownPicks(matchups, [])
       return res.json({ entry: null, hasEntry: false, userId: targetId, locked, breakdown })

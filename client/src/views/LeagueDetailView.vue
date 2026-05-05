@@ -181,7 +181,10 @@ onMounted(load)
 
         <div class="mt-10">
           <h3 class="font-semibold text-navy-900">Member brackets</h3>
-          <ul class="mt-2 space-y-2">
+          <p v-if="!locked" class="mt-2 text-sm text-slate-600">
+            Hidden until the league locks so picks can’t be influenced.
+          </p>
+          <ul v-else class="mt-2 space-y-2">
             <li v-for="m in league.members" :key="m._id">
               <RouterLink
                 :to="`/leagues/${league._id}/users/${m._id}`"
