@@ -171,7 +171,7 @@ async function deleteLeague() {
                   <th class="whitespace-nowrap px-3 py-3 sm:px-4">Wrong</th>
                   <th class="whitespace-nowrap px-3 py-3 sm:px-4">Pending</th>
                   <th class="whitespace-nowrap px-3 py-3 sm:px-4">Unpicked</th>
-                  <th class="min-w-[6rem] px-3 py-3 sm:px-4">Champion</th>
+                  <th v-if="locked" class="min-w-[6rem] px-3 py-3 sm:px-4">Champion</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
@@ -183,7 +183,7 @@ async function deleteLeague() {
                   <td class="whitespace-nowrap px-3 py-3 text-red-600 sm:px-4">{{ row.incorrectPicks }}</td>
                   <td class="whitespace-nowrap px-3 py-3 text-slate-500 sm:px-4">{{ row.pendingPicks }}</td>
                   <td class="whitespace-nowrap px-3 py-3 text-slate-500 sm:px-4">{{ row.incompletePicks }}</td>
-                  <td class="px-3 py-3 text-slate-700 sm:px-4">{{ row.championPick || '—' }}</td>
+                  <td v-if="locked" class="px-3 py-3 text-slate-700 sm:px-4">{{ row.championPick || '—' }}</td>
                 </tr>
               </tbody>
             </table>
