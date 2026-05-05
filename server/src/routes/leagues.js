@@ -105,6 +105,7 @@ router.get('/:leagueId/leaderboard', async (req, res) => {
     const { league, error } = await requireMember(req.params.leagueId, req.userId)
     if (error) return res.status(error === 'Forbidden' ? 403 : 404).json({ error })
 
+    const locked = isLeagueLocked(league)
     const matchups = await getMatchupsMergedForLeague(league._id)
     const entries = await BracketEntry.find({ league: league._id }).populate([
       { path: 'user', select: 'name email' },
@@ -140,14 +141,14 @@ router.get('/:leagueId/leaderboard', async (req, res) => {
         incorrectPicks: s.incorrect,
         pendingPicks: s.pending,
         incompletePicks: s.incomplete,
-        championPick: championName,
+        championPick: locked ? championName : null,
       })
     }
 
     rows.sort((a, b) => b.totalPoints - a.totalPoints)
     const ranked = rows.map((r, i) => ({ rank: i + 1, ...r }))
 
-    return res.json({ leaderboard: ranked, locked: isLeagueLocked(league) })
+    return res.json({ leaderboard: ranked, locked })
   } catch (e) {
     console.error(e)
     return res.status(500).json({ error: 'Server error' })
