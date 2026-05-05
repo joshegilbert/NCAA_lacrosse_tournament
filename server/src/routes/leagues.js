@@ -1,6 +1,7 @@
 const express = require('express')
 const League = require('../models/League')
 const BracketEntry = require('../models/BracketEntry')
+const LeagueMatchupResult = require('../models/LeagueMatchupResult')
 const { authMiddleware } = require('../middleware/auth')
 const { getDefaultLockTime } = require('../config/bracket-defaults')
 const { generateInviteCode } = require('../utils/inviteCode')
@@ -190,6 +191,25 @@ router.patch('/:leagueId/lock', async (req, res) => {
       .populate('creator', 'name email')
       .populate('members', 'name email')
     return res.json({ league: populated })
+  } catch (e) {
+    console.error(e)
+    return res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.delete('/:leagueId', async (req, res) => {
+  try {
+    const { league, error } = await requireAdmin(req.params.leagueId, req.userId)
+    if (error) return res.status(error === 'Forbidden' ? 403 : 404).json({ error })
+
+    // Delete league-scoped data; keep the global bracket template + teams intact.
+    await Promise.all([
+      BracketEntry.deleteMany({ league: league._id }),
+      LeagueMatchupResult.deleteMany({ league: league._id }),
+      League.deleteOne({ _id: league._id }),
+    ])
+
+    return res.json({ ok: true })
   } catch (e) {
     console.error(e)
     return res.status(500).json({ error: 'Server error' })

@@ -1,10 +1,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { api } from '../services/api'
 import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
+const router = useRouter()
 const auth = useAuthStore()
 
 const league = ref(null)
@@ -57,6 +58,21 @@ async function copyCode() {
 }
 
 onMounted(load)
+
+async function deleteLeague() {
+  if (!league.value?._id) return
+  error.value = ''
+  const ok = window.confirm(
+    `Delete league “${league.value.name}”? This will remove all submitted brackets and results for this league. This cannot be undone.`
+  )
+  if (!ok) return
+  try {
+    await api(`/leagues/${league.value._id}`, { method: 'DELETE' })
+    await router.push('/dashboard')
+  } catch (e) {
+    error.value = e.message || 'Could not delete league'
+  }
+}
 </script>
 
 <template>
@@ -132,6 +148,14 @@ onMounted(load)
           >
             Admin results
           </RouterLink>
+          <button
+            v-if="isAdmin"
+            type="button"
+            class="flex min-h-[48px] w-full items-center justify-center rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-base font-semibold text-red-800 hover:bg-red-100"
+            @click="deleteLeague"
+          >
+            Delete league
+          </button>
         </section>
 
         <section class="mt-10">
