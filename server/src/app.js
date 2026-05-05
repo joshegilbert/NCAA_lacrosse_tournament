@@ -23,6 +23,13 @@ function parseCorsOrigins() {
 
 async function ensureMongoConnected() {
   if (mongoose.connection.readyState === 1) return
+  if (!mongoUri) {
+    const err = new Error(
+      'MONGO_URI is not set. In Vercel: Project → Settings → Environment Variables → add MONGO_URI (MongoDB Atlas connection string).'
+    )
+    err.statusCode = 503
+    throw err
+  }
   await mongoose.connect(mongoUri)
 }
 
@@ -50,6 +57,16 @@ function createApp() {
     })
   )
 
+  // Liveness only — does not open MongoDB (so routing works even when Atlas/env is wrong).
+  app.get('/api/health', (req, res) => {
+    const configured = Boolean(mongoUri)
+    const connected = mongoose.connection.readyState === 1
+    res.json({
+      ok: true,
+      mongo: { configured, connected, readyState: mongoose.connection.readyState },
+    })
+  })
+
   app.use(async (req, res, next) => {
     try {
       await ensureMongoConnected()
@@ -61,14 +78,17 @@ function createApp() {
 
   app.use(express.json())
 
-  app.get('/api/health', (req, res) => {
-    res.json({ ok: true })
-  })
-
   app.use('/api/auth', authRoutes)
   app.use('/api/leagues', leagueRoutes)
   app.use('/api/bracket', bracketRoutes)
   app.use('/api/admin', adminRoutes)
+
+  app.use((err, req, res, next) => {
+    if (res.headersSent) return next(err)
+    console.error(err)
+    const status = Number(err.statusCode) >= 400 && Number(err.statusCode) < 600 ? err.statusCode : 500
+    res.status(status).json({ error: err.message || 'Server error' })
+  })
 
   return app
 }
